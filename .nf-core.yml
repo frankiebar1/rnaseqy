@@ -1,0 +1,18 @@
+repository_type: pipeline
+
+nf_core_version: 3.3.2
+
+lint: {}
+
+template:
+  org: nf-core
+  name: rnaseqy
+  description: 'This pipeline aims to analyse RNA sequencing data including the following
+    steps: reading input, fastqc, trimming, aligning and marking duplicates.'
+  author: Francesco Barlow, Johanna Engeln
+  version: 1.0.0dev
+  force: true
+  outdir: .
+  skip_features:
+    - gpu
+  is_nfcore: true
