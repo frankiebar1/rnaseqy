@@ -9,7 +9,7 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_rnaseqy_pipeline'
-
+include { TRIMGALORE             } from '../modules/nf-core/trimgalore/main'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -20,11 +20,12 @@ workflow RNASEQY {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
-    main:
     //ch_samplesheet.dump()
+    main:
+    
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
-    
+
     //
     // MODULE: Run FastQC
     //
@@ -86,10 +87,23 @@ workflow RNASEQY {
         []
     )
 
+    //
+    // Module: Trimming - self-nf-coreadded
+    //
+
+    // channel stuff
+
+    TRIMGALORE(
+        ch_samplesheet
+    )
+
     emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 
+    
 }
+
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
