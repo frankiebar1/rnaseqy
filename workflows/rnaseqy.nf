@@ -5,7 +5,9 @@
 */
 include { FASTQC                 } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { TRIMGALORE } from '../modules/nf-core/trimgalore/main' 
+include { TRIMGALORE             } from '../modules/nf-core/trimgalore/main' 
+include { STAR_GENOMEGENERATE    } from '../modules/nf-core/star/genomegenerate/main' 
+include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -32,7 +34,7 @@ workflow RNASEQY {
     FASTQC (
         ch_samplesheet
     )
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.map { it[1] })
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
 
     //
@@ -77,6 +79,38 @@ workflow RNASEQY {
             sort: true
         )
     )
+    
+
+   //
+   // MODULE: STAR Genome Index Generation
+    //
+    ch_reference_fasta = Channel.of([ [ id: 'genome' ], file(params.fasta) ])
+    ch_annotation_gtf  = Channel.of([ [ id: 'genome' ], file(params.gtf) ])
+
+    STAR_GENOMEGENERATE_OUT = STAR_GENOMEGENERATE(
+        ch_reference_fasta,
+        ch_annotation_gtf
+    )
+
+    ch_star_index = STAR_GENOMEGENERATE_OUT.index
+    
+
+    //
+    // MODULE: STAR Alignment
+    //
+    STAR_ALIGN_OUT = STAR_ALIGN(
+        ch_samplesheet,
+        ch_star_index,
+        ch_annotation_gtf,
+        false,
+        [],
+        []
+    )
+
+    ch_multiqc_files = ch_multiqc_files.mix(STAR_ALIGN_OUT.log_final.map { it[1] })
+    ch_multiqc_files = ch_multiqc_files.mix(STAR_ALIGN_OUT.log_out.map { it[1] })
+    ch_multiqc_files = ch_multiqc_files.mix(STAR_ALIGN_OUT.log_progress.map { it[1] })
+    ch_versions = ch_versions.mix(STAR_ALIGN_OUT.versions.first())
 
     MULTIQC (
         ch_multiqc_files.collect(),
