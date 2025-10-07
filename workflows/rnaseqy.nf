@@ -29,10 +29,18 @@ workflow RNASEQY {
     ch_multiqc_files = Channel.empty()
     
     //
+    // MODULE: TrimGalore (trim reads first)
+    //
+    TRIMGALORE_OUT = TRIMGALORE(ch_samplesheet)
+    // add TrimGalore reports to MultiQC and versions
+    ch_multiqc_files = ch_multiqc_files.mix(TRIMGALORE_OUT.zip.map { it[1] })
+    ch_versions = ch_versions.mix(TRIMGALORE_OUT.versions.first())
+
+    //
     // MODULE: Run FastQC
     //
     FASTQC (
-        ch_samplesheet
+        TRIMGALORE_OUT.reads
     )
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.map { it[1] })
     ch_versions = ch_versions.mix(FASTQC.out.versions.first())
@@ -99,7 +107,7 @@ workflow RNASEQY {
     // MODULE: STAR Alignment
     //
     STAR_ALIGN_OUT = STAR_ALIGN(
-        ch_samplesheet,
+        TRIMGALORE_OUT.reads,
         ch_star_index,
         ch_annotation_gtf,
         false,
@@ -119,10 +127,6 @@ workflow RNASEQY {
         ch_multiqc_logo.toList(),
         [],
         []
-    )
-
-    TRIMGALORE (
-        ch_samplesheet
     )
 
     emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
