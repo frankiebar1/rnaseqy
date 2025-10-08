@@ -19,6 +19,26 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_rnas
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+process UNZIP_READS {
+    tag "${meta.id}"
+    publishDir "intermediate/unzipped", mode: 'copy'
+
+    input:
+    tuple val(meta), path(reads)
+
+    output:
+    tuple val(meta), path("*.fq")
+
+    script:
+    """
+    for f in ${reads}
+    do
+        name=\$(basename \$f .gz)
+        gunzip -c \$f > \$name
+    done
+    """
+}
+
 workflow RNASEQY {
 
     take:
@@ -106,8 +126,10 @@ workflow RNASEQY {
     //
     // MODULE: STAR Alignment
     //
+    UNZIPPED_READS = UNZIP_READS(TRIMGALORE_OUT.reads)
+
     STAR_ALIGN_OUT = STAR_ALIGN(
-        TRIMGALORE_OUT.reads,
+        UNZIPPED_READS,
         ch_star_index,
         ch_annotation_gtf,
         false,
