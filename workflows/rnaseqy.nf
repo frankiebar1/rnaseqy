@@ -142,10 +142,16 @@ workflow RNASEQY {
     CUSTOM_GETCHROMSIZES_OUT = CUSTOM_GETCHROMSIZES (
         ch_reference_fasta
     )
-    
 
-    PICARD_MARKDUPLICATES_OUT = PICARD_MARKDUPLICATES(
+    SAMTOOLS_SORT_OUT = SAMTOOLS_SORT(
         ch_bam,
+        ch_reference_fasta,
+        []
+    )
+
+    
+    PICARD_MARKDUPLICATES_OUT = PICARD_MARKDUPLICATES(
+        SAMTOOLS_SORT_OUT.bam,
         ch_reference_fasta,
         CUSTOM_GETCHROMSIZES_OUT.fai
     )
