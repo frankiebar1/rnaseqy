@@ -10,6 +10,9 @@ include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pi
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_rnaseqy_pipeline'
 include { TRIMGALORE             } from '../modules/nf-core/trimgalore/main'
+include { STAR_GENOMEGENERATE    } from '../modules/nf-core/star/genomegenerate/main'  
+include { SENTIEON_STARALIGN } from '../modules/nf-core/sentieon/staralign/main'  
+include { STAR_ALIGN } from '../modules/nf-core/star/align/main'      
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -97,6 +100,35 @@ workflow RNASEQY {
         ch_samplesheet
     )
 
+    ch_trim_reads = TRIMGALORE.out.reads
+    ch_trim_reads.dump()
+
+    ch_reference_fasta = Channel.of([[id : 'genome'], file(params.genome_fasta, checkIfExists: true)])
+    ch_reference_gtf   = Channel.of([[id : 'genome'], file(params.gtf, checkIfExists: true)])
+
+    STAR_GENOMEGENERATE(
+        ch_reference_fasta,
+        ch_reference_gtf
+    )
+
+    ch_index = STAR_GENOMEGENERATE.out.index
+    ch_index.dump()
+    ch_reads_index = TRIMGALORE.out.reads.combine(ch_index)
+    ch_reads_index.dump()
+
+    ch_trim_reads.view { "reads: $it" }
+    ch_index.view { "index: $it" }
+    ch_reference_gtf.view { "gtf: $it" }
+    
+    STAR_ALIGN(
+        ch_trim_reads, // Sample information
+        ch_index, // Reference information index
+        ch_reference_gtf, //Reference information gtf file
+        false, // Ignore annotaion boolean
+        [],
+        []
+    )
+    
     emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 
