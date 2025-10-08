@@ -8,6 +8,7 @@ include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { TRIMGALORE             } from '../modules/nf-core/trimgalore/main' 
 include { STAR_GENOMEGENERATE    } from '../modules/nf-core/star/genomegenerate/main' 
 include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
+include { UNZIPPER             } from '../modules/local/unzipper/main'
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -19,25 +20,6 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_rnas
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-process UNZIP_READS {
-    tag "${meta.id}"
-    publishDir "intermediate/unzipped", mode: 'copy'
-
-    input:
-    tuple val(meta), path(reads)
-
-    output:
-    tuple val(meta), path("*.fq")
-
-    script:
-    """
-    for f in ${reads}
-    do
-        name=\$(basename \$f .gz)
-        gunzip -c \$f > \$name
-    done
-    """
-}
 
 workflow RNASEQY {
 
@@ -126,10 +108,11 @@ workflow RNASEQY {
     //
     // MODULE: STAR Alignment
     //
-    UNZIPPED_READS = UNZIP_READS(TRIMGALORE_OUT.reads)
+    UNZIPPER_OUT = UNZIPPER(TRIMGALORE_OUT.reads)
+
 
     STAR_ALIGN_OUT = STAR_ALIGN(
-        UNZIPPED_READS,
+        UNZIPPER_OUT.reads,
         ch_star_index,
         ch_annotation_gtf,
         false,
