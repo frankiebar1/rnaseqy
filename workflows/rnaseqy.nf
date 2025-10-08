@@ -8,7 +8,11 @@ include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { TRIMGALORE             } from '../modules/nf-core/trimgalore/main' 
 include { STAR_GENOMEGENERATE    } from '../modules/nf-core/star/genomegenerate/main' 
 include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
-include { UNZIPPER             } from '../modules/local/unzipper/main'
+include { UNZIPPER               } from '../modules/local/unzipper/main'
+include { PICARD_MARKDUPLICATES  } from '../modules/nf-core/picard/markduplicates/main'
+include { SAMTOOLS_SORT          } from '../modules/nf-core/samtools/sort/main'
+include { SAMTOOLS_INDEX         } from '../modules/nf-core/samtools/index/main'
+include { CUSTOM_GETCHROMSIZES   } from '../modules/nf-core/custom/getchromsizes/main'   
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -132,6 +136,18 @@ workflow RNASEQY {
         ch_multiqc_logo.toList(),
         [],
         []
+    )
+    ch_bam = STAR_ALIGN_OUT.bam
+
+    CUSTOM_GETCHROMSIZES_OUT = CUSTOM_GETCHROMSIZES (
+        ch_reference_fasta
+    )
+    
+
+    PICARD_MARKDUPLICATES_OUT = PICARD_MARKDUPLICATES(
+        ch_bam,
+        ch_reference_fasta,
+        CUSTOM_GETCHROMSIZES_OUT.fai
     )
 
     emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
