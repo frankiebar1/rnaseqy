@@ -11,7 +11,10 @@ include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
 include { UNZIPPER               } from '../modules/local/unzipper/main'
 include { PICARD_MARKDUPLICATES  } from '../modules/nf-core/picard/markduplicates/main'
 include { SAMTOOLS_SORT          } from '../modules/nf-core/samtools/sort/main'
-include { CUSTOM_GETCHROMSIZES   } from '../modules/nf-core/custom/getchromsizes/main'   
+include { CUSTOM_GETCHROMSIZES   } from '../modules/nf-core/custom/getchromsizes/main'
+include { SALMON_INDEX           } from '../modules/nf-core/salmon/index/main' 
+include { SALMON_QUANT           } from '../modules/nf-core/salmon/quant/main'  
+include { CUSTOM_TX2GENE         } from '../modules/nf-core/custom/tx2gene/main' 
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -97,7 +100,7 @@ workflow RNASEQY {
    //
    // MODULE: STAR Genome Index Generation
     //
-    ch_reference_fasta = Channel.of([ [ id: 'genome' ], file(params.fasta) ])
+    ch_reference_fasta = Channel.of([ [ id: 'genome' ], file(params.fasta_genome) ])
     ch_annotation_gtf  = Channel.of([ [ id: 'genome' ], file(params.gtf) ])
 
     STAR_GENOMEGENERATE_OUT = STAR_GENOMEGENERATE(
@@ -154,6 +157,36 @@ workflow RNASEQY {
         ch_reference_fasta.collect(),
         CUSTOM_GETCHROMSIZES_OUT.fai.collect()
     )
+
+    //
+    // MODULE: Salmon Index
+    //
+    SALMON_INDEX_OUT = SALMON_INDEX(
+        Channel.of(file(params.fasta_genome)),
+        Channel.of(file(params.fasta_transcripts))
+    )
+
+    //
+    // MODULE: Salmon Quant
+    //
+    SALMON_QUANT_OUT = SALMON_QUANT(
+        TRIMGALORE_OUT.reads,
+        SALMON_INDEX_OUT.index,         // <- output from SALMON_INDEX
+        Channel.of(file(params.gtf)),
+        Channel.of(file(params.fasta_transcripts)),
+        false,
+        []
+    )
+
+    /*CUSTOM_TX2GENE_OUT = CUSTOM_TX2GENE(
+        Channel.of(file(params.gtf)),
+        [],
+        [],
+        [],
+        []
+    )*/
+
+
 
     emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
