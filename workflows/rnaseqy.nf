@@ -17,6 +17,9 @@ include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_rnaseqy_pipeline'
+include { STRINGTIE_STRINGTIE    } from '../modules/nf-core/stringtie/stringtie/main'    
+include { STRINGTIE_MERGE } from '../modules/nf-core/stringtie/merge/main'  
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -166,6 +169,19 @@ workflow RNASEQY {
     SUBREAD_FEATURECOUNTS_OUT = SUBREAD_FEATURECOUNTS(
         ch_for_featruecounts
     )
+
+    STRINGTIE_STRINGTIE_OUT = STRINGTIE_STRINGTIE(
+        PICARD_MARKDUPLICATES_OUT.bam,
+        ch_gtf_path.collect()
+    )
+
+    ch_transcript_gtfs = STRINGTIE_STRINGTIE_OUT.transcript_gtf.map { meta, gtf -> gtf }
+
+    STRINGTIE_MERGE(
+        ch_transcript_gtfs.collect(), 
+        ch_gtf_path.collect()
+    )
+
 
     emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
