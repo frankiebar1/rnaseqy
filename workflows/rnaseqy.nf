@@ -11,12 +11,12 @@ include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
 include { UNZIPPER               } from '../modules/local/unzipper/main'
 include { PICARD_MARKDUPLICATES  } from '../modules/nf-core/picard/markduplicates/main'
 include { SAMTOOLS_SORT          } from '../modules/nf-core/samtools/sort/main'
-include { CUSTOM_GETCHROMSIZES   } from '../modules/nf-core/custom/getchromsizes/main'   
+include { CUSTOM_GETCHROMSIZES   } from '../modules/nf-core/custom/getchromsizes/main'  
+include { SUBREAD_FEATURECOUNTS  } from '../modules/nf-core/subread/featurecounts/main'   
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_rnaseqy_pipeline'
-
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -136,6 +136,7 @@ workflow RNASEQY {
         [],
         []
     )
+
     ch_bam = STAR_ALIGN_OUT.bam
 
     CUSTOM_GETCHROMSIZES_OUT = CUSTOM_GETCHROMSIZES (
@@ -153,6 +154,17 @@ workflow RNASEQY {
         SAMTOOLS_SORT_OUT.bam,
         ch_reference_fasta.collect(),
         CUSTOM_GETCHROMSIZES_OUT.fai.collect()
+    )
+
+    // Start feature count
+    ch_gtf_path = ch_annotation_gtf.map { meta, gtf -> gtf }
+
+    ch_for_featruecounts = PICARD_MARKDUPLICATES_OUT.bam.combine(ch_gtf_path)
+        .map { meta, bam, gtf ->
+            tuple(meta, bam, gtf)}
+
+    SUBREAD_FEATURECOUNTS_OUT = SUBREAD_FEATURECOUNTS(
+        ch_for_featruecounts
     )
 
     emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
