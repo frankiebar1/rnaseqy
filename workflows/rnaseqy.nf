@@ -11,7 +11,6 @@ include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
 include { UNZIPPER               } from '../modules/local/unzipper/main'
 include { PICARD_MARKDUPLICATES  } from '../modules/nf-core/picard/markduplicates/main'
 include { SAMTOOLS_SORT          } from '../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX         } from '../modules/nf-core/samtools/index/main'
 include { CUSTOM_GETCHROMSIZES   } from '../modules/nf-core/custom/getchromsizes/main'   
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -117,8 +116,8 @@ workflow RNASEQY {
 
     STAR_ALIGN_OUT = STAR_ALIGN(
         UNZIPPER_OUT.reads,
-        ch_star_index,
-        ch_annotation_gtf,
+        ch_star_index.collect(),
+        ch_annotation_gtf.collect(),
         false,
         [],
         []
@@ -145,15 +144,15 @@ workflow RNASEQY {
 
     SAMTOOLS_SORT_OUT = SAMTOOLS_SORT(
         ch_bam,
-        ch_reference_fasta,
+        ch_reference_fasta.collect(),
         []
     )
 
     
     PICARD_MARKDUPLICATES_OUT = PICARD_MARKDUPLICATES(
         SAMTOOLS_SORT_OUT.bam,
-        ch_reference_fasta,
-        CUSTOM_GETCHROMSIZES_OUT.fai
+        ch_reference_fasta.collect(),
+        CUSTOM_GETCHROMSIZES_OUT.fai.collect()
     )
 
     emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
