@@ -10,17 +10,15 @@ import pandas as pd
 ## Functions
 # merge counts in one table
 def merge_featurecounts(input_dir, output_file):
-    print(input_dir)
-    files = glob.glob(os.path.join(input_dir, "*"
-    ".tsv"))
-    print("Files: ", files)
+    # Collect files
+    files = glob.glob(os.path.join(input_dir, "*.txt"))
     if not files:
-        raise ValueError("No .featureCounts.tsv files found in", input_dir)
-    print("Files: ", files)
+        raise ValueError("No files found in", input_dir)
+    
     merged = None
     for f in files:
         df = pd.read_csv(f, sep="\t")
-        df.head()
+        #print(df.head)
         df = df.iloc[:, [0, -1]]  # keep geneid + counts column
         sample = os.path.basename(f).replace(".featureCounts.txt", "")
         df.columns = ["Geneid", sample]
@@ -43,5 +41,4 @@ parser.add_argument("--plot", default="featureCounts_PCA.png", help="Output PCA 
 args = parser.parse_args()
 
 print("Script is used")
-print(args.indir)
 merge_featurecounts(args.indir, args.out)
