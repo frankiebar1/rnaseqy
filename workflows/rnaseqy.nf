@@ -8,9 +8,10 @@ include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { TRIMGALORE             } from '../modules/nf-core/trimgalore/main' 
 include { STAR_GENOMEGENERATE    } from '../modules/nf-core/star/genomegenerate/main' 
 include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
-include { UNZIPPER as UNZIP_FASTQ } from '../modules/local/unzipper/main'
-include { UNZIPPER as UNZIP_GTF }   from '../modules/local/unzipper/main'
-include { UNZIPPER as UNZIP_GFF }   from '../modules/local/unzipper/main'
+include { UNZIPPER as UNZIP_FASTQ} from '../modules/local/unzipper/main'
+include { UNZIPPER as UNZIP_GTF  } from '../modules/local/unzipper/main'
+include { UNZIPPER as UNZIP_GFF  } from '../modules/local/unzipper/main'
+include { MERGY                  } from '../modules/local/mergy/main'
 include { PICARD_MARKDUPLICATES  } from '../modules/nf-core/picard/markduplicates/main'
 include { SAMTOOLS_SORT          } from '../modules/nf-core/samtools/sort/main'
 include { CUSTOM_GETCHROMSIZES   } from '../modules/nf-core/custom/getchromsizes/main'  
@@ -192,6 +193,15 @@ workflow RNASEQY {
     STRINGTIE_MERGE(
         ch_transcript_gtfs.collect(), 
         ch_gff_path.collect()
+    )
+
+    ch_stringtie = Channel.fromPath("${params.outdir}/stringtie")
+    ch_outdir = Channel.fromPath("${params.outdir}")
+
+    MERGY (
+        ch_stringtie,
+        ch_outdir,
+        STRINGTIE_STRINGTIE_OUT.transcript_gtf
     )
 
 
