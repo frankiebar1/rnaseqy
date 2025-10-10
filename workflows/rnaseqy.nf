@@ -31,11 +31,14 @@ workflow RNASEQY {
 
     take:
     ch_samplesheet // channel: samplesheet read in from --input
+
     main:
-    //ch_samplesheet.dump()
+    
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
-    
+
+    // MODULE: Unzipper (selfwritten to unzip our files)
+
     //
     // MODULE: TrimGalore (trim reads first)
     //
