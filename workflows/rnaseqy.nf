@@ -8,7 +8,8 @@ include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { TRIMGALORE             } from '../modules/nf-core/trimgalore/main' 
 include { STAR_GENOMEGENERATE    } from '../modules/nf-core/star/genomegenerate/main' 
 include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
-include { UNZIPPER               } from '../modules/local/unzipper/main'
+include { UNZIPPER as UNZIP_FASTQ } from '../modules/local/unzipper/main'
+include { UNZIPPER as UNZIP_GTF }   from '../modules/local/unzipper/main'
 include { PICARD_MARKDUPLICATES  } from '../modules/nf-core/picard/markduplicates/main'
 include { SAMTOOLS_SORT          } from '../modules/nf-core/samtools/sort/main'
 include { CUSTOM_GETCHROMSIZES   } from '../modules/nf-core/custom/getchromsizes/main'  
@@ -36,8 +37,11 @@ workflow RNASEQY {
     
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
+    ch_reference_fasta = Channel.of([ [ id: 'genome' ], file(params.fasta) ])
+    ch_annotation_gtf  = Channel.of([ [ id: 'genome' ], file(params.gtf) ])
 
     // MODULE: Unzipper (selfwritten to unzip our files)
+    UNZIPPER_GTF = UNZIP_GTF(ch_annotation_gtf)
 
     //
     // MODULE: TrimGalore (trim reads first)
@@ -103,12 +107,11 @@ workflow RNASEQY {
    //
    // MODULE: STAR Genome Index Generation
     //
-    ch_reference_fasta = Channel.of([ [ id: 'genome' ], file(params.fasta) ])
-    ch_annotation_gtf  = Channel.of([ [ id: 'genome' ], file(params.gtf) ])
+    
 
     STAR_GENOMEGENERATE_OUT = STAR_GENOMEGENERATE(
         ch_reference_fasta,
-        ch_annotation_gtf
+        UNZIPPER_GTF.unzipped
     )
 
     ch_star_index = STAR_GENOMEGENERATE_OUT.index
@@ -117,13 +120,13 @@ workflow RNASEQY {
     //
     // MODULE: STAR Alignment
     //
-    UNZIPPER_OUT = UNZIPPER(TRIMGALORE_OUT.reads)
+    UNZIPPER_OUT = UNZIP_FASTQ(TRIMGALORE_OUT.reads)
 
 
     STAR_ALIGN_OUT = STAR_ALIGN(
-        UNZIPPER_OUT.reads,
+        UNZIPPER_OUT.unzipped,
         ch_star_index.collect(),
-        ch_annotation_gtf.collect(),
+        UNZIPPER_GTF.unzipped.collect(),
         false,
         [],
         []
@@ -163,7 +166,7 @@ workflow RNASEQY {
     )
 
     // Start feature count
-    ch_gtf_path = ch_annotation_gtf.map { meta, gtf -> gtf }
+    ch_gtf_path = UNZIPPER_GTF.unzipped.map { meta, gtf -> gtf }
 
     ch_for_featruecounts = PICARD_MARKDUPLICATES_OUT.bam.combine(ch_gtf_path)
         .map { meta, bam, gtf ->
@@ -173,17 +176,6 @@ workflow RNASEQY {
         ch_for_featruecounts
     )
 
-    STRINGTIE_STRINGTIE_OUT = STRINGTIE_STRINGTIE(
-        PICARD_MARKDUPLICATES_OUT.bam,
-        ch_gtf_path.collect()
-    )
-
-    ch_transcript_gtfs = STRINGTIE_STRINGTIE_OUT.transcript_gtf.map { meta, gtf -> gtf }
-
-    STRINGTIE_MERGE(
-        ch_transcript_gtfs.collect(), 
-        ch_gtf_path.collect()
-    )
 
 
     emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html

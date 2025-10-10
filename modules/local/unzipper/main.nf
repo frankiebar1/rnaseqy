@@ -13,7 +13,7 @@ process UNZIPPER {
         tuple val(meta), path(reads)
 
     output:
-        tuple val(meta), path("*.fq"), emit: reads
+        tuple val(meta), path("*.{fq,fastq,gtf,fna,fa}"), emit: unzipped
         path "versions.yml", emit: versions
 
     when:
