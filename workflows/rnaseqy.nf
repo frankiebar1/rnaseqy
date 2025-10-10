@@ -10,6 +10,7 @@ include { STAR_GENOMEGENERATE    } from '../modules/nf-core/star/genomegenerate/
 include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
 include { UNZIPPER as UNZIP_FASTQ } from '../modules/local/unzipper/main'
 include { UNZIPPER as UNZIP_GTF }   from '../modules/local/unzipper/main'
+include { UNZIPPER as UNZIP_GFF }   from '../modules/local/unzipper/main'
 include { PICARD_MARKDUPLICATES  } from '../modules/nf-core/picard/markduplicates/main'
 include { SAMTOOLS_SORT          } from '../modules/nf-core/samtools/sort/main'
 include { CUSTOM_GETCHROMSIZES   } from '../modules/nf-core/custom/getchromsizes/main'  
@@ -38,10 +39,14 @@ workflow RNASEQY {
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
     ch_reference_fasta = Channel.of([ [ id: 'genome' ], file(params.fasta) ])
-    ch_annotation_gtf  = Channel.of([ [ id: 'genome' ], file(params.gtf) ])
+    ch_reference_gtf  = Channel.of([ [ id: 'genome' ], file(params.gtf) ])
+    ch_reference_gff = Channel.of([ [ id: 'genome' ], file(params.gff) ])
 
+    //
     // MODULE: Unzipper (selfwritten to unzip our files)
-    UNZIPPER_GTF = UNZIP_GTF(ch_annotation_gtf)
+    //
+    UNZIPPER_GTF = UNZIP_GTF(ch_reference_gtf)
+    UNZIPPER_GFF = UNZIP_GFF(ch_reference_gff)
 
     //
     // MODULE: TrimGalore (trim reads first)
@@ -167,6 +172,7 @@ workflow RNASEQY {
 
     // Start feature count
     ch_gtf_path = UNZIPPER_GTF.unzipped.map { meta, gtf -> gtf }
+    ch_gff_path = UNZIPPER_GFF.unzipped.map { meta, gff -> gff }
 
     ch_for_featruecounts = PICARD_MARKDUPLICATES_OUT.bam.combine(ch_gtf_path)
         .map { meta, bam, gtf ->
@@ -176,6 +182,17 @@ workflow RNASEQY {
         ch_for_featruecounts
     )
 
+    STRINGTIE_STRINGTIE_OUT = STRINGTIE_STRINGTIE(
+        PICARD_MARKDUPLICATES_OUT.bam,
+        ch_gff_path.collect()
+    )
+
+    ch_transcript_gtfs = STRINGTIE_STRINGTIE_OUT.transcript_gtf.map { meta, gtf -> gtf }
+
+    STRINGTIE_MERGE(
+        ch_transcript_gtfs.collect(), 
+        ch_gff_path.collect()
+    )
 
 
     emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
