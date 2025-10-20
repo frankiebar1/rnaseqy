@@ -231,6 +231,19 @@ workflow RNASEQY {
         [],
         []
     )
+    // add MultiQC to versions
+    ch_versions = ch_versions.mix(MULTIQC.out.versions)
+
+    //
+    // Save MultiQC to software versions
+    //
+    softwareVersionsToYAML(ch_versions)
+        .collectFile(
+            storeDir: "${params.outdir}/pipeline_info",
+            name: 'nf_core_'  +  'rnaseqy_software_'  + 'mqc_'  + 'versions.yml',
+            sort: true,
+            newLine: true
+        )
     
     emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
