@@ -5,24 +5,25 @@
 */
 include { FASTQC                 } from '../modules/nf-core/fastqc/main'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { TRIMGALORE             } from '../modules/nf-core/trimgalore/main' 
-include { STAR_GENOMEGENERATE    } from '../modules/nf-core/star/genomegenerate/main' 
-include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
-include { UNZIPPER as UNZIP_FASTQ} from '../modules/local/unzipper/main'
-include { UNZIPPER as UNZIP_GTF  } from '../modules/local/unzipper/main'
-include { UNZIPPER as UNZIP_GFF  } from '../modules/local/unzipper/main'
-include { MERGY                  } from '../modules/local/mergy/main'
-include { PICARD_MARKDUPLICATES  } from '../modules/nf-core/picard/markduplicates/main'
-include { SAMTOOLS_SORT          } from '../modules/nf-core/samtools/sort/main'
-include { CUSTOM_GETCHROMSIZES   } from '../modules/nf-core/custom/getchromsizes/main'  
-include { SUBREAD_FEATURECOUNTS  } from '../modules/nf-core/subread/featurecounts/main'   
 include { paramsSummaryMap       } from 'plugin/nf-schema'
 include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_rnaseqy_pipeline'
-include { STRINGTIE_STRINGTIE    } from '../modules/nf-core/stringtie/stringtie/main'    
-include { STRINGTIE_MERGE } from '../modules/nf-core/stringtie/merge/main'  
 
+// Included for our pipeline
+include { TRIMGALORE             } from '../modules/nf-core/trimgalore/main' 
+include { UNZIPPER as UNZIP_FASTQ} from '../modules/local/unzipper/main'
+include { UNZIPPER as UNZIP_GTF  } from '../modules/local/unzipper/main'
+include { UNZIPPER as UNZIP_GFF  } from '../modules/local/unzipper/main'
+include { STAR_GENOMEGENERATE    } from '../modules/nf-core/star/genomegenerate/main' 
+include { STAR_ALIGN             } from '../modules/nf-core/star/align/main'
+include { PICARD_MARKDUPLICATES  } from '../modules/nf-core/picard/markduplicates/main'
+include { SAMTOOLS_SORT          } from '../modules/nf-core/samtools/sort/main'
+include { CUSTOM_GETCHROMSIZES   } from '../modules/nf-core/custom/getchromsizes/main'  
+include { SUBREAD_FEATURECOUNTS  } from '../modules/nf-core/subread/featurecounts/main' 
+include { STRINGTIE_STRINGTIE    } from '../modules/nf-core/stringtie/stringtie/main'    
+include { STRINGTIE_MERGE        } from '../modules/nf-core/stringtie/merge/main'  
+include { MERGY                  } from '../modules/local/mergy/main'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
