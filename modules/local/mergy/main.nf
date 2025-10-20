@@ -10,7 +10,7 @@ process MERGY {
     
     path(indir)
     path(outdir)
-    tuple val(dont), path (care)
+    path(placeholder)
 
     output:
     path "versions.yml"           , emit: versions
@@ -24,7 +24,7 @@ process MERGY {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        mergy: \$(mergy --version)
+        mergy: 1.0.0
     END_VERSIONS
     """
 }

@@ -27,9 +27,9 @@ process UNZIPPER {
             gunzip -c \$f > \$base
         done
 
-        cat <<-END_VERSIONS > versions.yml
-        "${task.process}":
-            pigz: \$(pigz --version 2>&1 | head -n 1)
-        END_VERSIONS
+        tool_version="1.0.0"
+
+        echo "UNZIP:" > versions.yml
+        echo "  unzip: \$tool_version" >> versions.yml
         """
 }
