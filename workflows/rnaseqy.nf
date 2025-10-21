@@ -140,12 +140,12 @@ workflow RNASEQY {
     //
     ch_gtf_path = UNZIP_GTF.out.unzipped.map { meta, gtf -> gtf }
     ch_gff_path = UNZIP_GFF.out.unzipped.map { meta, gff -> gff }
-    ch_for_featruecounts = PICARD_MARKDUPLICATES.out.bam.combine(ch_gtf_path)
+    ch_for_featurecounts = PICARD_MARKDUPLICATES.out.bam.combine(ch_gtf_path)
         .map { meta, bam, gtf ->
             tuple(meta, bam, gtf)}
 
     SUBREAD_FEATURECOUNTS(
-        ch_for_featruecounts
+        ch_for_featurecounts
     )
     // add subread_featurecounts to versions
     ch_versions = ch_versions.mix(SUBREAD_FEATURECOUNTS.out.versions)
@@ -176,7 +176,7 @@ workflow RNASEQY {
     MERGY (
         ch_stringtie,
         ch_outdir,
-        STRINGTIE_MERGE.out.gtf // this is a space hodler to make sure, that MERGY runs after all samples went throught stringtie (discussed this with Mark as a workaround)
+        STRINGTIE_MERGE.out.gtf // this is a space holder to make sure that MERGY runs after all samples went through stringtie (discussed this with Mark as a workaround)
     )
     // add mergy to versions
     ch_versions = ch_versions.mix(MERGY.out.versions)

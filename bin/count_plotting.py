@@ -22,7 +22,7 @@ def merge_featurecounts(input_dir, output_file):
         df = pd.read_csv(f, sep="\t")
         #print(df.head)
         df = df.iloc[:, [0, -1]]  # keep geneid + counts column
-        sample = os.path.basename(f).replace(".featureCounts.txt", "")
+        sample = os.path.basename(f).replace(".gene.abundance.txt", "")
         df.columns = ["Geneid", sample]
         merged = df if merged is None else merged.merge(df, on="Geneid", how="outer")
 
