@@ -70,13 +70,13 @@ def plot_pca(counts_file, plot_file):
 parser = argparse.ArgumentParser()
 
 parser.add_argument("--indir", required=True, help="Directory with *.featureCounts.tsv files")
-parser.add_argument("--outdir", default="featureCounts_matrix.tsv", help="Output merged matrix file")
-parser.add_argument("--plot", default="featureCounts_PCA.png", help="Output PCA plot file")
+parser.add_argument("--outdir", default="mergy", help="Output merged matrix folder")
+parser.add_argument("--plot", default="mergy", help="Output PCA plot folder")
 args = parser.parse_args()
 
 #print("Script is used")
 output_file = os.path.join(args.outdir, "merged_counts.tsv")
-output_plot = os.path.join(args.outdir, "pca_plot.png")
+output_plot = os.path.join(args.outdir, "pca.png")
 
 out_file = merge_featurecounts(args.indir, output_file)
 plot_pca(out_file, output_plot)

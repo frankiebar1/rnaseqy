@@ -13,7 +13,9 @@ process MERGY {
     path(placeholder)
 
     output:
-    path "versions.yml"           , emit: versions
+    path "MERGY_PCA_Plot_mqc.png", emit: plot
+    path "MERGY_counts_mqc.tsv", emit: table
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -21,6 +23,9 @@ process MERGY {
     script:
     """
     count_plotting.py --indir ${indir} --outdir ${outdir}
+
+    cp ${outdir}/pca.png ./MERGY_PCA_Plot_mqc.png
+    cp ${outdir}/merged_counts.tsv ./MERGY_counts_mqc.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

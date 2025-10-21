@@ -180,6 +180,8 @@ workflow RNASEQY {
     )
     // add mergy to versions
     ch_versions = ch_versions.mix(MERGY.out.versions)
+    ch_multiqc_files = ch_multiqc_files.mix(MERGY.out.table)
+    ch_multiqc_files = ch_multiqc_files.mix(MERGY.out.plot)
 
     //
     // Collate and save software versions
