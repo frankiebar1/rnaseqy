@@ -55,6 +55,7 @@ nextflow run nf-core/rnaseqy \
    --input samplesheet.csv \
    --gtf annotationgtf.gtf \
    --gff annotationgff.gff \
+   --fasta genome.fasta \
    --outdir <OUTDIR>
 ```
 
