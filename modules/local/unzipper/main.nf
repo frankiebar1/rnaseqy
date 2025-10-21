@@ -24,12 +24,12 @@ process UNZIPPER {
         for f in ${reads}
         do
             base=\$(basename \$f .gz)
-            gunzip -c \$f > \$base
+            pigz -dc \$f > \$base
         done
 
         cat <<-END_VERSIONS > versions.yml
         "${task.process}":
-            unzipper: 0.1.0
+            unzipper: 1.0.0
             pigz: \$( pigz --version 2>&1 | sed 's/pigz //g' )
         END_VERSIONS
         """

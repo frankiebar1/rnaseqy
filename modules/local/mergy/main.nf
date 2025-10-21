@@ -24,7 +24,7 @@ process MERGY {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        mergy: 0.1.0
+        mergy: 1.0.0
         python: \$(python --version 2>&1)
         matplotlib: \$(python -c "import matplotlib; print(matplotlib.__version__)" 2>/dev/null)
         pandas: \$(python -c "import pandas; print(pandas.__version__)" 2>/dev/null)
