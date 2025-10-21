@@ -20,12 +20,22 @@
 
 ## Introduction
 
-**nf-core/rnaseqy** is a bioinformatics pipeline used to analyse RNA sequencing data including the organism's genome fasta file and gff/gtf annotation files. A samplesheet is taken as input with FASTQ files and it performs Quality Control, trimming, alignment, read counting and finally outputs a sample/gene count table in csv format.
-
+**nf-core/rnaseqy** is a bioinformatics pipeline used to analyse RNA sequencing data including the organism's genome fasta file and gff/gtf annotation files. A samplesheet is taken as input with FASTQ files and it performs trimming, Quality Control, alignment, read counting and finally outputs a sample/gene count table as tsv format. To have a first look at the data the pipeline performs a PCA analysis.
 
 <!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
      workflows use the "tube map" design for that. See https://nf-co.re/docs/guidelines/graphic_design/workflow_diagrams#examples for examples.   -->
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->1. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))2. Present QC for raw reads ([`MultiQC`](http://multiqc.info/))
+<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
+
+![alt text](image.png)
+
+
+1. Quality and adapter trimming of FastQ files ([`TrimGalore`])
+2. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
+3. Alignment of RNA seq reads ([`STAR`])
+4. Mark duplicate reads([`PicardMarkDuplicates`])
+5. Assembles alignment reads ([`FeatrueCounts`], [`StringTie`])
+6. Final analysis and merge ([`Mergy`])
+7. Present QC for trimmed reads ([`MultiQC`](http://multiqc.info/))
 
 ## Usage
 
