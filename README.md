@@ -26,14 +26,14 @@
      workflows use the "tube map" design for that. See https://nf-co.re/docs/guidelines/graphic_design/workflow_diagrams#examples for examples.   -->
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
-![alt text](image.png)
+![Pipeline workflow](docs/image.png)
 
 
-1. Quality and adapter trimming of FastQ files ([`TrimGalore`])
+1. Quality and adapter trimming of FastQ files ([`TrimGalore`](https://www.bioinformatics.babraham.ac.uk/projects/trim_galore/))
 2. Read QC ([`FastQC`](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/))
-3. Alignment of RNA seq reads ([`STAR`])
-4. Mark duplicate reads([`PicardMarkDuplicates`])
-5. Assembles alignment reads ([`FeatrueCounts`], [`StringTie`])
+3. Alignment of RNA seq reads ([`STAR`](https://hbctraining.github.io/Intro-to-rnaseq-hpc-O2/lessons/03_alignment.html))
+4. Mark duplicate reads([`PicardMarkDuplicates`](https://broadinstitute.github.io/picard/))
+5. Assembles alignment reads ([`FeatrueCounts`](https://subread.sourceforge.net/featureCounts.html), [`StringTie`](https://ccb.jhu.edu/software/stringtie/))
 6. Final analysis and merge ([`Mergy`])
 7. Present QC for trimmed reads ([`MultiQC`](http://multiqc.info/))
 
