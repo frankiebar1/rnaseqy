@@ -1,7 +1,7 @@
 id: "nf-core-rnaseqy-methods-description"
-description: "Suggested text and references to use when describing pipeline usage within the methods section of a publication."
+description: "The pipeline is used to process FastQ files for multiple samples. It performs adapter and quality trimming, quality control, alignment and read counts for further anaylsis of differentially expressed genes. The main output is a summary count table in tsv format which includes the reads in TPM for all samples per genes."
 section_name: "nf-core/rnaseqy Methods Description"
-section_href: "https://github.com/nf-core/rnaseqy"
+##section_href: "https://github.com/nf-core/rnaseqy"
 plot_type: "html"
 ## TODO nf-core: Update the HTML below to your preferred methods description, e.g. add publication citation for this pipeline
 ## You inject any metadata in the Nextflow '${workflow}' object

@@ -72,13 +72,19 @@ nextflow run nf-core/rnaseqy \
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
 
-For more details and further functionality, please refer to the [usage documentation](https://nf-co.re/rnaseqy/usage) and the [parameter documentation](https://nf-co.re/rnaseqy/parameters).
+Further input paramters can be set, but are very limited in the first version. To adapt the performance of the module TrimGalore (set the cut of value for quality trimming) and the STAR alignment. 
+
+```bash
+-- trimgalore_quality 
+-- star_ignore_sjdbgtf
+-- seq_platform
+-- seq_center
+```
 
 ## Pipeline output
 
-To see the results of an example test run with a full size dataset refer to the [results](https://nf-co.re/rnaseqy/results) tab on the nf-core website pipeline page.
-For more details about the output files and reports, please refer to the
-[output documentation](https://nf-co.re/rnaseqy/output).
+The outputs of the pipeline are available in the directory set while calling the pipeline. They include intermediate outputs relative to the used modules as well as the real.
+The most important file is merged\_counts.tsv which is a tab separated file containing genes as rows and samples as columns, each data point being the TPM amount of a gene in a specific sample.
 
 ## Credits
 

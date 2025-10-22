@@ -1,0 +1,2 @@
+sample,fastq_1,fastq_2,strandedness
+GM12878_REP1,s3://ngi-igenomes/test-data/rnaseq/SRX1603629_T1_1.fastq.gz,s3://ngi-igenomes/test-data/rnaseq/SRX1603629_T1_2.fastq.gz,reverse
