@@ -63,12 +63,13 @@ Now, you can run the pipeline using:
 nextflow run nf-core/rnaseqy \
    -profile <docker/singularity/...test/institute> \
    --input samplesheet.csv \
-   --gtf annotationgtf.gtf \
-   --gff annotationgff.gff \
+   --gtf annotationgtf.gtf.gz \
+   --gff annotationgff.gff.gz \
    --fasta genome.fasta \
    --outdir <OUTDIR>
 ```
 
+In the current version, it is necessary to give the annotation files in zipped format to avoid encountering errors.
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
 
